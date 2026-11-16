@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Muse Auto</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header>
+    <h1>Muse Auto</h1>
+    <span class="sub">Muse AI · video · 1 tài khoản</span>
+    <button id="openAppBtn" class="small-btn head-btn" title="Mở giao diện lớn: lưới cảnh, xem video, sửa prompt, thống kê">Mở Muse Studio ↗</button>
+    <button id="openEditorBtn" class="small-btn" title="Sắp xếp và ghép các video thành một video dài">Dựng video ✂</button>
+  </header>
+
+  <div id="banner" class="banner" hidden>
+    <div id="bannerText"></div>
+    <button id="bannerClose" class="link" title="Ẩn">✕</button>
+  </div>
+
+  <section class="card">
+    <h2>Dự án</h2>
+    <div id="projects" class="projects"></div>
+    <div class="proj-btns">
+      <button id="newProjectBtn" class="small-btn">+ Dự án mới</button>
+      <button id="projUpBtn" class="small-btn" title="Đưa dự án đang mở lên trước">↑</button>
+      <button id="projDownBtn" class="small-btn" title="Đưa dự án đang mở xuống sau">↓</button>
+      <button id="delProjectBtn" class="small-btn danger" title="Xóa hẳn dự án đang mở">Xóa dự án</button>
+    </div>
+    <label class="check-row"><input id="setRunAll" type="checkbox"> Chạy lần lượt tất cả dự án (xong dự án này tự tải ZIP rồi sang dự án kế tiếp)</label>
+  </section>
+
+  <section class="card">
+    <h2>Đầu vào</h2>
+    <label class="field">
+      <span>Tên dự án</span>
+      <input id="episode" type="text" placeholder="vd: Tap01" autocomplete="off">
+    </label>
+    <div class="field">
+      <span>prompts.txt</span>
+      <span class="file-pair"><label class="filebtn">Chọn tệp…<input id="promptsFile" type="file" accept=".txt,text/plain" hidden></label><button id="pasteBtn" class="small-btn" title="Dán hoặc sửa prompt trực tiếp, mỗi dòng một cảnh">Dán prompt…</button></span>
+      <small id="promptsInfo" class="muted"></small>
+    </div>
+    <div class="field">
+      <span>Làm tiếp</span>
+      <span class="file-pair"><button id="appendBtn" class="small-btn" title="Dán thêm prompt, nối tiếp số cảnh hiện có">+ Thêm cảnh (dán)</button><label class="filebtn">+ Thêm từ tệp…<input id="appendFile" type="file" accept=".txt,text/plain" hidden></label></span>
+      <small class="muted">Nối vào cuối dự án, giữ nguyên cảnh và video đã có</small>
+    </div>
+    <div class="field">
+      <span>Ảnh khung đầu</span>
+      <label class="filebtn">Chọn thư mục…<input id="imagesDir" type="file" webkitdirectory multiple hidden></label>
+      <small id="imagesInfo" class="muted">Không bắt buộc (c01.png, c02.png…)</small>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Chế độ</h2>
+    <div class="seg" role="radiogroup">
+      <label><input type="radio" name="mode" value="semi"> <span>Bán tự động</span></label>
+      <label><input type="radio" name="mode" value="auto"> <span>Tự động</span></label>
+    </div>
+    <p class="muted small" id="modeHint"></p>
+    <div class="thread-row">
+      <span id="threadInfo" class="muted small"></span>
+      <button id="newThreadBtn" class="small-btn" title="Cảnh kế tiếp mở cuộc trò chuyện mới, các cảnh sau dùng chung cuộc đó">Cuộc trò chuyện mới</button>
+      <button id="useThreadBtn" class="small-btn" title="Gửi tiếp vào một cuộc trò chuyện Muse có sẵn (dán link hoặc dùng chat đang mở)">Dùng chat có sẵn…</button>
+    </div>
+    <details id="settingsBox">
+      <summary>Cài đặt</summary>
+      <div class="grid">
+        <label>Chờ giữa 2 video, tối thiểu (giây ≥ 20)<input id="setDelayMin" type="number" min="20" step="1"></label>
+        <label>Chờ giữa 2 video, tối đa (giây ≥ 60)<input id="setDelayMax" type="number" min="60" step="1"></label>
+        <label>Nghỉ dài sau mỗi (video, ≤ 10)<input id="setBatch" type="number" min="1" max="10" step="1"></label>
+        <label>Nghỉ dài tối thiểu (giây ≥ 180)<input id="setPauseMin" type="number" min="180" step="1"></label>
+        <label>Nghỉ dài tối đa (giây ≥ 300)<input id="setPauseMax" type="number" min="300" step="1"></label>
+        <label>Khi làm lại cảnh đã xong
+          <select id="setRegen">
+            <option value="ask">Hỏi mỗi lần</option>
+            <option value="keep">Giữ cả hai (_v2, _v3…)</option>
+            <option value="overwrite">Ghi đè bản cũ</option>
+          </select>
+        </label>
+        <label>Tự động: gửi sau khi điền (giây)<input id="setAutoSend" type="number" min="1" max="120" step="1"></label>
+        <label class="wide">Tiền tố thêm vào đầu mỗi prompt (để trống nếu không cần)<input id="setPrefix" type="text" placeholder="vd: Animate:"></label>
+        <label class="check wide"><input id="setAttach" type="checkbox"> Đính kèm ảnh khung đầu / nhân vật / storyboard đã gán</label>
+        <label class="check wide"><input id="setSameThread" type="checkbox"> Gửi nhiều cảnh trong cùng một cuộc trò chuyện</label>
+        <label>Đổi sang cuộc trò chuyện mới sau mỗi (cảnh, 0 = không đổi)<input id="setThreadMax" type="number" min="0" max="50" step="1"></label>
+        <label class="check wide"><input id="setNewThreadOnError" type="checkbox"> Mở cuộc trò chuyện mới ngay sau một cảnh bị lỗi</label>
+        <div class="wide claude-box">
+          <b>Muse tự sửa khi cảnh lỗi</b>
+          <label>Khi cảnh lỗi, nhắn tiếp trong cùng cuộc trò chuyện để Muse tự sửa prompt và tạo lại
+            <select id="setMuseFix">
+              <option value="off">Tắt</option>
+              <option value="refused">Chỉ khi bị từ chối (vi phạm/chính sách)</option>
+              <option value="all">Mọi lỗi sau khi đã gửi (kể cả quá 6 phút)</option>
+            </select>
+          </label>
+          <label>Số lần nhắn tối đa mỗi cảnh (1–3)<input id="setMuseFixMax" type="number" min="1" max="3" step="1"></label>
+          <label>Nội dung tin nhắn ({error} = lỗi của Muse, {style} = đặc trưng sản xuất ở khung Claude bên dưới)
+            <textarea id="setMuseFixTemplate" rows="4" spellcheck="false"></textarea>
+          </label>
+          <button id="museFixResetBtn" type="button" class="small-btn">Dùng lại mẫu mặc định</button>
+          <small class="muted">Tin nhắn sửa tính là một lượt tạo: vẫn chờ 20–60 giây và nghỉ dài như bình thường. Muse có thể đổi chi tiết của cảnh khi tự sửa.</small>
+        </div>
+        <div class="wide claude-box">
+          <b>Claude — sửa prompt bị Muse từ chối</b>
+          <label>Chế độ
+            <select id="setClaudeMode">
+              <option value="off">Tắt</option>
+              <option value="suggest">Gợi ý — tôi duyệt trong dashboard</option>
+              <option value="auto">Tự sửa rồi tạo lại</option>
+            </select>
+          </label>
+          <label>Claude API key (chỉ lưu trên máy này)
+            <span class="key-row"><input id="claudeKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…"><button id="claudeTestBtn" type="button" class="small-btn">Kiểm tra</button></span>
+          </label>
+          <small id="claudeKeyStatus" class="muted"></small>
+          <label>Đặc trưng sản xuất cần giữ nguyên (dùng cho cả Claude và tin nhắn nhờ Muse tự sửa)
+            <textarea id="setClaudeStyle" rows="3" placeholder="vd: 3D animated feature film style, soft rounded shapes, big expressive eyes, cinematic lighting, 16:9, about 5 seconds, no subtitles, no watermark, no background music. Giữ nguyên thiết kế nhân vật."></textarea>
+          </label>
+          <small class="muted">Khi bật, prompt bị từ chối (kèm lỗi của Muse, prompt cảnh trước/sau và đặc trưng ở trên) được gửi tới api.anthropic.com, tính phí vào tài khoản Anthropic của bạn.</small>
+        </div>
+        <label>Tự tải lại trang (F5) sau mỗi (lần tạo, 0 = tắt)<input id="setReloadEvery" type="number" min="0" max="100" step="1"></label>
+        <label class="check wide"><input id="setAutoRetry" type="checkbox"> Tự động tạo lại cảnh lỗi (trước khi đóng ZIP của dự án)</label>
+        <label>Số lần tự làm lại tối đa mỗi cảnh (1–5)<input id="setAutoRetryMax" type="number" min="1" max="5" step="1"></label>
+        <label class="check wide"><input id="setAutoRetryRefused" type="checkbox"> Làm lại cả cảnh bị trang từ chối vì chính sách (thường sẽ bị từ chối tiếp)</label>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <div class="btnrow">
+      <button id="runBtn" class="primary">Chạy tự động</button>
+      <button id="pauseBtn">Tạm dừng</button>
+      <button id="resumeBtn">Tiếp tục</button>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="progress-text"><span id="progText"></span><span id="etaText"></span></div>
+    <div id="activity" class="activity"></div>
+  </section>
+
+  <section id="summary" class="card summary" hidden></section>
+
+  <section class="card">
+    <div class="list-head">
+      <h2>Danh sách cảnh</h2>
+      <span id="selInfo" class="muted small"></span>
+    </div>
+    <div class="btnrow small">
+      <button id="retryBtn">Làm lại cảnh này</button>
+      <button id="skipBtn">Bỏ qua cảnh này</button>
+      <button id="exportBtn">Xuất danh sách cảnh lỗi</button>
+    </div>
+    <div id="scenes" class="scenes"></div>
+  </section>
+
+  <section class="card">
+    <h2>Công cụ</h2>
+    <div class="btnrow small">
+      <button id="zipBtn" title="Đóng tất cả video đã tạo của tập này thành một tệp ZIP">Tải ZIP tất cả video</button>
+      <button id="surveyBtn"title="Đánh dấu các phần tử tìm được trên trang muse.ai, không tạo gì">Khảo sát trang</button>
+      <button id="copySurveyBtn" hidden>Sao chép báo cáo</button>
+      <button id="resetBtn" class="danger">Xóa dữ liệu</button>
+    </div>
+    <pre id="surveyOut" class="out" hidden></pre>
+    <details>
+      <summary>Nhật ký</summary>
+      <pre id="log" class="out"></pre>
+    </details>
+  </section>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-box">
+      <p id="modalText"></p>
+      <div id="modalBtns" class="btnrow"></div>
+    </div>
+  </div>
+
+  <script src="../frame-quality.js"></script>
+  <script src="../reference-model.js"></script>
+  <script src="../background-timing.js"></script>
+  <script src="../content/selectors.js"></script>
+  <script src="sidepanel.js"></script>
+  <script src="claude.js"></script>
+</body>
+</html>

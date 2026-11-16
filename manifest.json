@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Muse Auto",
+  "version": "1.4.2",
+  "description": "Tự động tạo video bằng Muse AI trên tài khoản đang đăng nhập — có giãn cách, dừng ngay khi gặp giới hạn/CAPTCHA.",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "downloads",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://muse.ai/*",
+    "https://www.muse.ai/*",
+    "https://api.anthropic.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html"
+  },
+  "action": {
+    "default_title": "Mở Muse Auto"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://muse.ai/*",
+        "https://www.muse.ai/*"
+      ],
+      "js": [
+        "background-timing.js",
+        "content/selectors.js",
+        "content/meta.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

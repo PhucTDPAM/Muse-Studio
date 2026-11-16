@@ -1,0 +1,8 @@
+ffmpeg.wasm — dùng cho trang "Dựng video" của Muse Auto (chạy hoàn toàn trong trình duyệt).
+
+esm/   @ffmpeg/ffmpeg 0.12.15  — giấy phép MIT        — https://github.com/ffmpegwasm/ffmpeg.wasm
+core/  @ffmpeg/core   0.12.10  — GPL-2.0-or-later      — https://github.com/ffmpegwasm/ffmpeg.wasm
+       (bản build FFmpeg — https://ffmpeg.org — kèm libx264 và các thư viện khác)
+
+Thay đổi duy nhất: esm/const.js — CORE_URL trỏ tới core/ffmpeg-core.js nội bộ
+thay vì unpkg.com, để extension không bao giờ tải mã từ mạng.

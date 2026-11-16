@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Muse Auto — Dựng video</title>
+  <link rel="stylesheet" href="../app/app.css">
+  <link rel="stylesheet" href="editor.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <b>Dựng video</b>
+      <span class="muted" id="epName">Muse Auto</span>
+    </div>
+    <label class="filebtn">+ Thêm video từ máy…<input id="addFiles" type="file" accept="video/mp4,video/*" multiple hidden></label>
+    <button id="reloadBtn" title="Nạp lại các video đã tạo theo thứ tự cảnh (bỏ thứ tự đã sắp)">↺ Nạp lại theo thứ tự cảnh</button>
+    <span class="grow"></span>
+    <span id="totalInfo" class="muted"></span>
+  </header>
+
+  <div id="banner" class="banner" hidden>
+    <div id="bannerText"></div>
+    <button id="bannerClose" class="link" title="Ẩn">✕</button>
+  </div>
+
+  <div class="ed-layout">
+    <main class="ed-main">
+      <section class="card">
+        <div class="toolbar">
+          <h2>Thứ tự clip</h2>
+          <span class="muted small">Kéo ⠿ để đổi thứ tự · bỏ chọn để không đưa vào video · thả tệp .mp4 vào trang để thêm</span>
+        </div>
+        <ol id="clips" class="clips"></ol>
+      </section>
+    </main>
+
+    <aside class="ed-side">
+      <section class="card">
+        <h2>Xem thử</h2>
+        <div class="player"><video id="player" controls playsinline></video></div>
+        <div class="player-bar">
+          <button id="playSeq" class="primary">▶ Xem thử cả chuỗi</button>
+          <button id="prevClip" title="Clip trước">⏮</button>
+          <button id="nextClip" title="Clip sau">⏭</button>
+          <span id="nowPlaying" class="muted small"></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Xuất video</h2>
+        <label class="ed-field">Tên tệp
+          <input id="outName" type="text" autocomplete="off">
+        </label>
+        <div class="ed-field">Cách ghép
+          <label class="radio"><input type="radio" name="rmode" value="auto" checked>
+            <span><b>Tự động</b> — ghép nhanh, giữ nguyên chất lượng nếu các clip cùng định dạng; nếu khác thì render lại</span></label>
+          <label class="radio"><input type="radio" name="rmode" value="encode">
+            <span><b>Luôn render lại</b> — đồng nhất kích thước, chậm hơn nhiều</span></label>
+        </div>
+        <div class="grid2" id="encodeOpts">
+          <label class="ed-field">Kích thước
+            <select id="outSize">
+              <option value="first">Theo clip đầu tiên</option>
+              <option value="1920x1080">1920×1080</option>
+              <option value="1280x720">1280×720</option>
+              <option value="1080x1920">1080×1920 (dọc)</option>
+            </select>
+          </label>
+          <label class="ed-field">Chất lượng
+            <select id="outCrf">
+              <option value="18">Cao (tệp lớn)</option>
+              <option value="21" selected>Vừa</option>
+              <option value="25">Nhẹ (tệp nhỏ)</option>
+            </select>
+          </label>
+        </div>
+        <div class="btnrow">
+          <button id="renderBtn" class="primary">Render video</button>
+          <button id="cancelBtn" hidden>Hủy</button>
+        </div>
+        <div class="progress ed-prog"><div id="rbar"></div></div>
+        <div id="rstatus" class="muted small"></div>
+        <details>
+          <summary>Nhật ký ffmpeg</summary>
+          <pre id="rlog" class="out"></pre>
+        </details>
+      </section>
+    </aside>
+  </div>
+
+  <div id="dropOverlay" class="drop-overlay" hidden>
+    <div>Thả các tệp <b>.mp4</b> vào đây để thêm vào cuối danh sách</div>
+  </div>
+
+  <script type="module" src="editor.js"></script>
+</body>
+</html>

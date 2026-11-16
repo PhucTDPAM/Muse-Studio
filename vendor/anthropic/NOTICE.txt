@@ -1,0 +1,4 @@
+@anthropic-ai/sdk 0.134.0 (giấy phép MIT — xem LICENSE), đóng gói một tệp bằng esbuild cho trình duyệt:
+  esbuild entry.mjs --bundle --format=esm --platform=browser --target=chrome116 --minify
+  entry.mjs:  export { default as Anthropic } from '@anthropic-ai/sdk';
+Chỉ được dùng bởi sidepanel/claude.js; chỉ gọi tới https://api.anthropic.com.
