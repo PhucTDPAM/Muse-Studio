@@ -11,6 +11,10 @@ Extension Chrome (Manifest V3) giúp tạo video hàng loạt bằng Muse AI tr�
 
 > ⚠️ **Lưu ý quan trọng:** phiên bản này được viết **khi chưa khảo sát trực tiếp** giao diện muse.ai, vì công cụ viết mã không truy cập được trình duyệt. Các selector trong `content/selectors.js` là phỏng đoán theo aria-label, role và văn bản hiển thị. **Trước khi chạy thật, hãy dùng nút "Khảo sát trang"** (xem mục 4) rồi sửa `selectors.js` nếu cần.
 
+## Skill ChatGPT đi kèm: Slow English Story → Muse
+
+Thư mục [`Skill/`](Skill/) có skill **slow-english-muse** dùng trong ChatGPT. Skill lên kịch bản, nhân vật và storyboard cho phim hoạt hình Slow English (trẻ 3–7 tuổi), rồi xuất gói thư mục để nhập vào dashboard bằng nút **Nhập trọn thư mục từ skill**. Hướng dẫn cài và dùng: [Skill/README.md](Skill/README.md).
+
 ## 1. Cài đặt
 
 1. Mở `chrome://extensions`.
