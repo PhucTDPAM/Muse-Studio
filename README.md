@@ -15,6 +15,81 @@ Extension Chrome (Manifest V3) giúp tạo video hàng loạt bằng Muse AI tr�
 
 Thư mục [`Skill/`](Skill/) có skill **slow-english-muse** dùng trong ChatGPT. Skill lên kịch bản, nhân vật và storyboard cho phim hoạt hình Slow English (trẻ 3–7 tuổi), rồi xuất gói thư mục để nhập vào dashboard bằng nút **Nhập trọn thư mục từ skill**. Hướng dẫn cài và dùng: [Skill/README.md](Skill/README.md).
 
+## Sơ đồ luồng chạy
+
+### 1. Toàn cảnh: từ ý tưởng đến video
+
+```mermaid
+flowchart TD
+    A["Chủ đề hoặc thumbnail + tiêu đề đối thủ"] --> B["Skill slow-english-muse<br/>trong ChatGPT"]
+    B --> C["Gói tập phim ep001/<br/>prompt + ảnh nhân vật + storyboard"]
+    C -->|"Nhập trọn thư mục từ skill"| D["Dashboard Muse Studio<br/>dự án + danh sách cảnh"]
+    P["prompts.txt / Dán prompt"] -.->|"cách nhập khác"| D
+    D -->|"Chạy tự động"| E["Hàng đợi<br/>(side panel hoặc dashboard)"]
+    E <-->|"điền prompt, gửi, theo dõi"| F["Tab muse.ai<br/>tài khoản đang đăng nhập"]
+    E --> G[("IndexedDB<br/>bản sao video")]
+    G --> H["Tên dự án.zip<br/>c01.mp4 … + cXX_loi.txt"]
+    G --> I["Dựng video ✂<br/>sắp xếp, ghép bằng ffmpeg.wasm"]
+    I --> J["Tên dự án_full.mp4"]
+```
+
+### 2. Vòng lặp hàng đợi
+
+```mermaid
+flowchart TD
+    S(["Bấm Chạy tự động / Tiếp tục"]) --> L{"Đang bị chặn?<br/>giới hạn, CAPTCHA, đăng nhập"}
+    L -->|"có"| STOP["Dừng, chờ bạn xử lý<br/>rồi bấm Tiếp tục"]
+    L -->|"không"| N{"Còn cảnh Chưa làm<br/>trong dự án đang mở?"}
+    N -->|"có"| W["Giãn cách 20–60 giây<br/>sau mỗi 10 video nghỉ 3–5 phút"]
+    W --> SC["Xử lý một cảnh<br/>(sơ đồ 3)"]
+    SC -->|"Xong / Lỗi"| N
+    SC -->|"Gặp giới hạn, CAPTCHA,<br/>đăng nhập, lỗi đính kèm ảnh"| STOP
+    SC -->|"Bạn bấm Tạm dừng"| PAUSE["Tạm dừng<br/>tiến độ đã lưu"]
+    N -->|"không"| R{"Có cảnh lỗi<br/>còn lượt làm lại?"}
+    R -->|"bị từ chối + bật Claude"| CL["Claude sửa prompt<br/>Gợi ý: chờ bạn duyệt<br/>Tự sửa: đưa lại hàng đợi"]
+    CL --> N
+    R -->|"lỗi thường, tối đa N lần"| RQ["Đưa lại hàng đợi"]
+    RQ --> N
+    R -->|"không còn"| Z["Đóng ZIP của dự án<br/>tự tải về"]
+    Z --> NP{"Bật chạy lần lượt và<br/>còn dự án có cảnh chưa làm?"}
+    NP -->|"có"| SW["Chuyển sang dự án kế tiếp"]
+    SW --> N
+    NP -->|"không"| DONE(["Hoàn tất"])
+```
+
+### 3. Xử lý một cảnh
+
+```mermaid
+flowchart TD
+    A(["Cảnh cXX"]) --> T{"Đủ N cảnh trong chat<br/>và chat không ghim?"}
+    T -->|"có"| NEW["Bỏ chat hiện tại"]
+    T -->|"không"| F5{"Đủ số lần tạo<br/>để F5?"}
+    NEW --> F5
+    F5 -->|"có"| RL["Tải lại trang F5"]
+    F5 -->|"không"| OPEN
+    RL --> OPEN{"Có chat chung<br/>đang dùng?"}
+    OPEN -->|"có"| TH["Mở lại chat đó"]
+    OPEN -->|"không"| NC["Mở muse.ai/thread/new"]
+    TH --> RDY
+    NC --> RDY["Chờ ô nhập prompt sẵn sàng<br/>tab bị ẩn thì đưa cửa sổ ra"]
+    RDY --> VM["Chọn chế độ video<br/>nếu trang vừa tải"]
+    VM --> IMG["Kiểm tra storyboard 16:9 đầy khung<br/>đính kèm storyboard + ảnh nhân vật"]
+    IMG --> FILL["Điền prompt, kiểm tra đủ chữ"]
+    FILL --> MODE{"Chế độ"}
+    MODE -->|"Bán tự động"| USER["Tô sáng nút Gửi<br/>chờ bạn bấm"]
+    MODE -->|"Tự động"| AUTO["Đếm ngược 5 giây<br/>bấm Gửi, xác nhận trang đã nhận"]
+    USER --> MON
+    AUTO --> MON["Theo dõi tối đa 6 phút<br/>% tiến độ, chỉ đọc cột hội thoại"]
+    MON -->|"có video kết quả"| DL["Lưu video vào IndexedDB<br/>c01.mp4, c02.mp4 …"]
+    DL --> OK(["Xong"])
+    MON -->|"giới hạn / CAPTCHA / đăng nhập"| BLK(["Dừng hàng đợi"])
+    MON -->|"bị từ chối / lỗi / quá 6 phút"| MF{"Bật Muse tự sửa<br/>và còn lượt?"}
+    MF -->|"có"| MSG["Giãn cách, rồi nhắn trong cùng chat:<br/>sửa prompt và tạo lại, giữ đặc trưng"]
+    MSG --> MON
+    MF -->|"không"| ERR["Đánh Lỗi, ghi lý do<br/>mở chat mới cho cảnh sau"]
+    ERR --> FAIL(["Lỗi — chờ làm lại cuối dự án"])
+```
+
 ## 1. Cài đặt
 
 1. Mở `chrome://extensions`.
